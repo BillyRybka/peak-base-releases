@@ -1,0 +1,205 @@
+# Peak Base: your business brain, self-hosted.
+#
+# One file, nothing else to download. On a Hostinger VPS: Docker Manager >
+# Compose from URL, paste this file's raw URL, set DOMAIN, deploy. Anywhere
+# else: `DOMAIN=base.example.com docker compose up -d`.
+#
+# Before deploying, point DOMAIN's DNS (an A record) at this server's IP. Caddy
+# then gets the HTTPS certificate on its own. Only ports 80 and 443 are used.
+#
+# Secrets are generated on first boot into the `secrets` volume and never leave
+# the server. The first account created in the desktop app owns the server;
+# after that, only invited people can sign up.
+#
+# Backups: every night the database and its key go into one archive, kept 14
+# days on the server. Set GDRIVE_TOKEN (see CLIENT-SETUP.md) and each archive is
+# also copied to the "Peak Base backups" folder in that Google Drive, kept 30
+# days. restore.sh puts one back.
+name: peak-base
+
+x-server: &server
+  image: ghcr.io/billyrybka/peak-base-server:${PEAK_BASE_VERSION:-latest}
+  environment:
+    NODE_ENV: production
+    BAALDA_DEPLOYMENT: self-hosted
+    BETTER_AUTH_URL: https://${DOMAIN:?set DOMAIN to this server's web address, e.g. base.example.com}
+    PORT: "3010"
+    SIGNUPS: invite
+    DEEP_LINK_SCHEME: ${DEEP_LINK_SCHEME:-peakbase}
+    MCP_SERVER_TITLE: ${MCP_SERVER_TITLE:-Business Brain}
+    MCP_START_NOTES: ${MCP_START_NOTES:-CLAUDE.md,Context/operator.md}
+    MCP_LATEST_FOLDER: ${MCP_LATEST_FOLDER:-Daily}
+    DOWNLOAD_BASE: ${DOWNLOAD_BASE:-}
+    DOWNLOAD_PAGE: ${DOWNLOAD_PAGE:-}
+  volumes:
+    - secrets:/secrets:ro
+  networks: [internal]
+
+services:
+  init:
+    image: alpine:3.20
+    command:
+      - sh
+      - -c
+      - |
+        umask 077
+        for s in pg jwt; do
+          [ -s /secrets/$$s ] || head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n' > /secrets/$$s
+        done
+        chown 70:70 /secrets/pg
+        chmod 444 /secrets/jwt /secrets/pg
+        echo secrets ready
+    volumes:
+      - secrets:/secrets
+    network_mode: none
+    restart: "no"
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: context
+      POSTGRES_DB: context
+      POSTGRES_PASSWORD_FILE: /secrets/pg
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - secrets:/secrets:ro
+    networks: [internal]
+    depends_on:
+      init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U context -d context"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  migrate:
+    <<: *server
+    command:
+      - sh
+      - -c
+      - export JWT_SECRET="$$(cat /secrets/jwt)" DATABASE_URL="postgres://context:$$(cat /secrets/pg)@postgres:5432/context" && exec node dist/db/migrate.js
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  server:
+    <<: *server
+    command:
+      - sh
+      - -c
+      - export JWT_SECRET="$$(cat /secrets/jwt)" DATABASE_URL="postgres://context:$$(cat /secrets/pg)@postgres:5432/context" && exec node dist/index.js
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://127.0.0.1:3010/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    command:
+      - caddy
+      - reverse-proxy
+      - --from
+      - ${DOMAIN}
+      - --to
+      - server:3010
+      - --header-up
+      - "X-Real-IP: {remote_host}"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - caddy_data:/data
+    networks: [internal, edge]
+    depends_on:
+      - server
+
+  backup:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      PGHOST: postgres
+      PGUSER: context
+      PGDATABASE: context
+      KEEP_DAYS: "14"
+    command:
+      - sh
+      - -c
+      - |
+        while true; do
+          export PGPASSWORD="$$(cat /secrets/pg)"
+          d=$$(date -u +%Y-%m-%dT%H%MZ)
+          w=/tmp/peak-base-$$d
+          f=/backups/peak-base-$$d.tar
+          mkdir -p "$$w"
+          if pg_dump -Fc -f "$$w/db.dump" && cp /secrets/jwt "$$w/jwt"             && tar -cf "$$f.part" -C "$$w" db.dump jwt && mv "$$f.part" "$$f"; then
+            echo "{\"lastBackup\":\"$$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"file\":\"$$(basename $$f)\"}" > /backups/status.json
+            echo "backup written: $$(basename $$f)"
+          else
+            rm -f "$$f.part"; echo "backup failed $$(date -u)" >&2
+          fi
+          rm -rf "$$w"
+          find /backups -name 'peak-base-*.tar' -mtime +$$KEEP_DAYS -delete
+          sleep 86400
+        done
+    volumes:
+      - backups:/backups
+      - secrets:/secrets:ro
+    networks: [internal]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  # Copies the nightly archives to Google Drive. Off until GDRIVE_TOKEN is set.
+  offsite:
+    image: rclone/rclone:1
+    restart: unless-stopped
+    entrypoint: ["sh", "-c"]
+    environment:
+      RCLONE_CONFIG_GDRIVE_TYPE: drive
+      RCLONE_CONFIG_GDRIVE_SCOPE: drive
+      RCLONE_CONFIG_GDRIVE_TOKEN: ${GDRIVE_TOKEN:-}
+      FOLDER: ${GDRIVE_FOLDER:-Peak Base backups}
+      KEEP_DAYS: "30"
+    command:
+      - |
+        if [ -z "$$RCLONE_CONFIG_GDRIVE_TOKEN" ]; then
+          echo "GDRIVE_TOKEN is not set: backups stay on this server only. See CLIENT-SETUP.md."
+          exec sleep infinity
+        fi
+        while true; do
+          if rclone copy /backups "gdrive:$$FOLDER" --include "peak-base-*.tar"; then
+            rclone delete "gdrive:$$FOLDER" --include "peak-base-*.tar" --min-age "$${KEEP_DAYS}d"
+            echo "copied to Google Drive: $$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          else
+            echo "Google Drive copy failed $$(date -u)" >&2
+          fi
+          sleep 21600
+        done
+    volumes:
+      - backups:/backups
+    networks: [edge]
+
+networks:
+  internal:
+    internal: true
+  edge: {}
+
+volumes:
+  pgdata:
+  secrets:
+  caddy_data:
+  backups:
