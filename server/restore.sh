@@ -45,7 +45,8 @@ read -r answer
 [ "$answer" = "RESTORE" ] || { echo "Stopped. Nothing changed."; exit 1; }
 
 echo "Stopping the app server..."
-docker stop "$P-caddy-1" "$P-server-1" >/dev/null
+docker stop "$P-caddy-1" >/dev/null 2>&1 || true
+docker stop "$P-server-1" >/dev/null
 
 echo "Restoring the database..."
 docker exec "$BACKUP" sh -c "
@@ -62,5 +63,6 @@ docker exec "$BACKUP" cat /tmp/restore/jwt | docker run --rm -i -v "${P}_secrets
 docker exec "$BACKUP" rm -rf /tmp/restore
 
 echo "Starting the app server..."
-docker start "$P-server-1" "$P-caddy-1" >/dev/null
+docker start "$P-server-1" >/dev/null
+docker start "$P-caddy-1" >/dev/null 2>&1 || true
 echo "Restored $FILE."
