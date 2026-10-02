@@ -4,7 +4,8 @@ One sitting with the client. You need their Hostinger login, a domain or subdoma
 
 ## 1. The server
 
-1. Hostinger: buy a KVM VPS (KVM 2 is plenty), operating system **Ubuntu with Docker**. Note its IP address.
+1. Hostinger: buy the **KVM 4** VPS through Peak Systems' link (it carries the referral and a free domain for a year), operating system **Ubuntu with Docker**. Note its IP address.
+   https://www.hostinger.com/cart?product=vps%3Avps_kvm_4&period=12&referral_type=cart_link&REFERRALCODE=YZIBILLYZVMT&referral_id=01a0fd83-b6f5-72ed-b32e-b63823936a7c
 2. DNS: add an **A record** for the brain's address (for example `brain.clientco.com`) pointing at that IP. Do this first; HTTPS needs it.
 3. Hostinger: VPS > Docker Manager > **Compose from URL**:
    `https://raw.githubusercontent.com/BillyRybka/peak-base-releases/main/server/docker-compose.yml`

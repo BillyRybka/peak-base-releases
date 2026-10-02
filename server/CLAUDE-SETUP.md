@@ -20,12 +20,14 @@ Talk plainly. One step at a time. Say what you are about to do before you do it.
 ## What you need from the person
 
 - **The brain's web address.** A subdomain of a domain they own, for example `brain.theircompany.com`. Ask which domain, and suggest `brain.` in front.
-- **Their Hostinger account**, already connected to you through the Hostinger tools. If the tools are missing, stop and tell them: in Claude Code run `claude mcp add hostinger -- npx -y hostinger-api-mcp`, then start a new session; the first Hostinger action opens a browser window to sign in.
+- **Their Hostinger account**, with a KVM 4 VPS or ready to buy one, already connected to you through the Hostinger tools. If the tools are missing, stop and tell them: in Claude Code run `claude mcp add hostinger -- npx -y hostinger-api-mcp`, then start a new session; the first Hostinger action opens a browser window to sign in.
 
 ## Step 1: the server
 
-1. `vps_virtual-machines_list`. If they already have a VPS, confirm which one to use and that nothing else runs on it.
-2. No VPS: recommend the **KVM 2** plan. They can buy it in hPanel, or you can buy it with `vps_virtual-machines_purchase` after showing the price and getting a yes.
+1. `vps_virtual-machines_list`. If they already have a VPS, confirm which one to use and that nothing else runs on it. Peak Base runs beside Hermes and Paperclip, so the server needs the **KVM 4** plan (4 cores, 16 GB) or bigger.
+2. No VPS yet: they buy it themselves through this link, in their browser. Do **not** buy it with `vps_virtual-machines_purchase`; the link carries Peak Systems' referral, which the API does not.
+   https://www.hostinger.com/cart?product=vps%3Avps_kvm_4&period=12&referral_type=cart_link&REFERRALCODE=YZIBILLYZVMT&referral_id=01a0fd83-b6f5-72ed-b32e-b63823936a7c
+   The order includes a free domain for a year, which can be the brain's address if they have no domain yet. In the cart they can pick Ubuntu with Docker under "Choose what to install"; otherwise you set the template in the next step.
 3. The server needs Docker. Find a template with Docker in it (`vps_templates_list`, an Ubuntu template whose name mentions Docker). For a brand-new VPS run `vps_virtual-machines_setup` with that template. For an existing, empty VPS without Docker, use `vps_virtual-machines_recreate` only after a yes.
 4. Note the server's public IPv4 address (`vps_virtual-machines_get`).
 
