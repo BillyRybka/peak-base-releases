@@ -26,7 +26,13 @@ You are helping a business owner set up Peak Base: their notes live on their own
 
 Give them the plan in five short lines: get a server, put Peak Base on it, install the app on their computer, move their Obsidian notes in, connect Claude. Ask whether they're on Mac or Windows and what's already done (for example, they may have bought the server already) and pick up from there.
 
-Check whether you have Hostinger tools (names like `vps_docker_create`, `vps_virtual-machines_list`). If you do, you can do steps 1 to 3 for them. If not, you guide the clicks. Don't ask them to install anything to get the tools.
+If you're running inside their notes folder (their Obsidian vault is your working folder), that's the vault for step 6: note its full path now.
+
+**Hostinger tools.** With them you do steps 1 to 3 yourself. Hostinger's tools come from its hosted connector, so there is nothing to install. Once they've bought the server (step 1), connect it:
+- Claude app: **Settings > Connectors > Add custom connector**, name `Hostinger`, address `https://mcp.hostinger.com`. A browser window opens; they sign in to Hostinger and approve. Their password stays with Hostinger.
+- Claude Code: run `claude mcp add --transport http hostinger https://mcp.hostinger.com` and they approve in the browser that opens.
+
+The connector gives you `search`, `execute` and `multi-execute`. Run each operation named below through `execute` as `{"operation": "<name>", "params": {...}}`, and use `search` with the operation's name first to get its exact parameters. If they'd rather not connect it, or it won't connect, guide the clicks instead (each step has both).
 
 ## Step 1: the server
 
@@ -35,6 +41,8 @@ They buy the server from Hostinger in their browser, through this link (it carri
 https://www.hostinger.com/cart?product=vps%3Avps_kvm_4&period=12&referral_type=cart_link&REFERRALCODE=YZIBILLYZVMT&referral_id=01a0fd83-b6f5-72ed-b32e-b63823936a7c
 
 Tell them: keep the plan as it is (KVM 4), and if the cart asks what to install, choose **Ubuntu with Docker**. Hostinger may ask them to set a server password; they choose it and keep it to themselves.
+
+Then connect the Hostinger tools (see Start). Never use `vps_virtual-machines_purchase`: buying through the link is what carries the referral.
 
 With Hostinger tools: `vps_virtual-machines_list` to find the server. If it already exists and something else runs on it, confirm it's the right one and empty before going on. If it has no operating system yet, find an Ubuntu template whose name mentions Docker (`vps_templates_list`) and run `vps_virtual-machines_setup` with it. On a server that already has a different system, `vps_virtual-machines_recreate` erases it: only after a clear yes.
 
@@ -97,7 +105,7 @@ If Docker Manager offers to install Docker first, let it. If it says the operati
 
 ## Step 6: move their Obsidian vault in
 
-First find where the vault lives (see below). If the folder sits in iCloud Drive (its path has `iCloud` or `Mobile Documents` in it), OneDrive, Dropbox or Google Drive, move it out first: those services can swap files for online-only placeholders, which Peak Base would read as emptied notes. On Windows, OneDrive often holds Documents and Desktop without people knowing: check whether the path has `OneDrive` in it. Have them make a new folder outside those (Mac: `Documents/Business Brain`; Windows: `C:\Users\<their name>\Business Brain`, made in File Explorer under their user folder), copy everything from the vault into it, then in Obsidian **Manage vaults > Open folder as vault** and pick the new folder. From then on they use the new folder; Peak Base is now what keeps it backed up and in sync.
+First find where the vault lives: the path you noted in Start, or see the end of this step. If the folder sits in iCloud Drive (its path has `iCloud` or `Mobile Documents` in it), OneDrive, Dropbox or Google Drive, move it out first: those services can swap files for online-only placeholders, which Peak Base would read as emptied notes. On Windows, OneDrive often holds Documents and Desktop without people knowing: check whether the path has `OneDrive` in it. Have them make a new folder outside those (Mac: `Documents/Business Brain`; Windows: `C:\Users\<their name>\Business Brain`, made in File Explorer under their user folder), copy everything from the vault into it, then in Obsidian **Manage vaults > Open folder as vault** and pick the new folder. From then on they use the new folder; Peak Base is now what keeps it backed up and in sync.
 
 1. In Peak Base choose **Open existing** and pick the folder their Obsidian vault lives in (the one with their notes). Obsidian's own settings folder is skipped on its own.
 2. Turn on **sync**. Everything in the folder uploads to their server. A big vault takes a while; let it finish.
