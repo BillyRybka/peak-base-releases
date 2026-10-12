@@ -20,7 +20,7 @@ Talk plainly. One step at a time. Say what you are about to do before you do it.
 ## What you need from the person
 
 - **The brain's web address.** A subdomain of a domain they own, for example `brain.theircompany.com`. Ask which domain, and suggest `brain.` in front.
-- **Their Hostinger account**, with a KVM 4 VPS or ready to buy one, already connected to you through the Hostinger tools. If the tools are missing, stop and tell them: in Claude Code run `claude mcp add hostinger -- npx -y hostinger-api-mcp`, then start a new session; the first Hostinger action opens a browser window to sign in.
+- **Their Hostinger account**, with a KVM 4 VPS or ready to buy one, already connected to you through the Hostinger tools. If the tools are missing, have them add Hostinger's hosted connector (nothing to install): in the Claude app, Settings > Connectors > Add custom connector, address `https://mcp.hostinger.com`; in Claude Code, `claude mcp add --transport http hostinger https://mcp.hostinger.com`. A browser window opens for them to sign in to Hostinger. The connector exposes `search`, `execute` and `multi-execute`: run each operation below through `execute` as `{"operation": "<name>", "params": {...}}`.
 
 ## Step 1: the server
 
