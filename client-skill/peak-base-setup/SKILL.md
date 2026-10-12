@@ -5,7 +5,7 @@ description: Walks a business owner through setting up Peak Base, their business
 
 # Peak Base setup
 
-You are helping a business owner set up Peak Base: their notes live on their own server, stay in sync with a folder on their Mac, and Claude can read and write them. They are not technical. Peak Systems built Peak Base and is their support.
+You are helping a business owner set up Peak Base: their notes live on their own server, stay in sync with a folder on their computer (Mac or Windows), and Claude can read and write them. They are not technical. Peak Systems built Peak Base and is their support.
 
 ## How you talk
 
@@ -24,7 +24,7 @@ You are helping a business owner set up Peak Base: their notes live on their own
 
 ## Start
 
-Give them the plan in five short lines: get a server, put Peak Base on it, install the app on their Mac, move their Obsidian notes in, connect Claude. Ask what's already done (for example, they may have bought the server already) and pick up from there.
+Give them the plan in five short lines: get a server, put Peak Base on it, install the app on their computer, move their Obsidian notes in, connect Claude. Ask whether they're on Mac or Windows and what's already done (for example, they may have bought the server already) and pick up from there.
 
 Check whether you have Hostinger tools (names like `vps_docker_create`, `vps_virtual-machines_list`). If you do, you can do steps 1 to 3 for them. If not, you guide the clicks. Don't ask them to install anything to get the tools.
 
@@ -77,7 +77,7 @@ If Docker Manager offers to install Docker first, let it. If it says the operati
 
 **Check it's live:** open `https://<address>/health`. It should answer ok. The secure connection can take a few minutes to start working on a new address; wait and try again. If it still fails after about ten minutes, check the server's firewall (`vps_firewall_list`, or hPanel **Security > Firewall**): ports 80 and 443 must be open.
 
-## Step 4: the app on their Mac
+## Step 4: the app on their computer
 
 1. Download: https://github.com/BillyRybka/peak-base-releases/releases/latest/download/PeakBase-Mac.dmg
 2. Open it and drag **Peak Base** into **Applications**.
@@ -85,7 +85,10 @@ If Docker Manager offers to install Docker first, let it. If it says the operati
    `xattr -cr "/Applications/Peak Base.app"`
    Why: a Mac blocks apps from makers it doesn't know yet. This tells it Peak Base is fine. They only do it once; the app updates itself after that.
 
-On Windows instead: https://github.com/BillyRybka/peak-base-releases/releases/latest/download/PeakBase-Windows.exe . If Windows says it protected the PC: **More info**, then **Run anyway**.
+**On Windows:**
+1. Download: https://github.com/BillyRybka/peak-base-releases/releases/latest/download/PeakBase-Windows.exe
+2. Open the file. If Windows says it protected the PC, click **More info**, then **Run anyway** (same reason: Windows doesn't know the maker yet). Click through the installer.
+3. Peak Base is in the Start menu. It updates itself after this.
 
 ## Step 5: the owner account
 
@@ -94,14 +97,14 @@ On Windows instead: https://github.com/BillyRybka/peak-base-releases/releases/la
 
 ## Step 6: move their Obsidian vault in
 
-First find where the vault lives (see below). If the folder sits in iCloud Drive (its path has `iCloud` or `Mobile Documents` in it), Dropbox, Google Drive or OneDrive, move it out first: those services can swap files for online-only placeholders, which Peak Base would read as emptied notes. Have them make a new folder in **Documents** (for example `Documents/Business Brain`), copy everything from the vault into it, then in Obsidian **Manage vaults > Open folder as vault** and pick the new folder. From then on they use the new folder; Peak Base is now what keeps it backed up and in sync.
+First find where the vault lives (see below). If the folder sits in iCloud Drive (its path has `iCloud` or `Mobile Documents` in it), OneDrive, Dropbox or Google Drive, move it out first: those services can swap files for online-only placeholders, which Peak Base would read as emptied notes. On Windows, OneDrive often holds Documents and Desktop without people knowing: check whether the path has `OneDrive` in it. Have them make a new folder outside those (Mac: `Documents/Business Brain`; Windows: `C:\Users\<their name>\Business Brain`, made in File Explorer under their user folder), copy everything from the vault into it, then in Obsidian **Manage vaults > Open folder as vault** and pick the new folder. From then on they use the new folder; Peak Base is now what keeps it backed up and in sync.
 
 1. In Peak Base choose **Open existing** and pick the folder their Obsidian vault lives in (the one with their notes). Obsidian's own settings folder is skipped on its own.
 2. Turn on **sync**. Everything in the folder uploads to their server. A big vault takes a while; let it finish.
 3. They can keep using Obsidian on the same folder. Nothing moves.
 4. If the folder has a `.claude/skills` folder inside, turn on **Vault settings > General > Sync skills** so their skills reach the brain too.
 
-Don't know where the vault is? In Obsidian, click the vault name at the bottom left, choose **Manage vaults**, then the menu next to their vault and **Reveal in Finder**. That's the folder to pick.
+Don't know where the vault is? In Obsidian, click the vault name at the bottom left, choose **Manage vaults**, then the menu next to their vault and **Reveal in Finder** (Mac) or **Show in system explorer** (Windows). That's the folder to pick. On Windows, clicking the address bar at the top of File Explorer shows the full path.
 
 ## Step 7: connect Claude to their brain
 
@@ -116,7 +119,7 @@ Then start a new chat and ask Claude something about their notes to prove it wor
 ## Later, when they want it
 
 **Backups to their Google Drive.** The server already backs up every night and keeps 14 days. To also keep 30 days in their Google Drive:
-1. Install rclone on their Mac: `brew install rclone` in Terminal. (No Homebrew? Peak Systems can do this step with them.)
+1. Install rclone. Windows: open **Terminal** (or PowerShell), run `winget install Rclone.Rclone`, then open a new Terminal window. Mac: `brew install rclone` in Terminal (no Homebrew? Peak Systems can do this step with them).
 2. In Terminal: `rclone authorize "drive"`. A browser opens; they sign in to Google and allow access.
 3. Terminal prints a block starting with `{"access_token"`. They copy all of it themselves, then in hPanel: **VPS > Docker Manager > peak-base > Environment**, add `GDRIVE_TOKEN` with that block as the value, and redeploy. Tell them not to paste it into this chat.
 4. Within a few hours a **Peak Base backups** folder appears in their Drive.
