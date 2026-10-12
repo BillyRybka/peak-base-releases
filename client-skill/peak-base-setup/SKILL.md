@@ -69,9 +69,12 @@ If it won't connect, use the hPanel clicks given under each step instead.
    MCP_SERVER_TITLE=Business Brain
    ```
 5. `vps_docker_containers` for `peak-base`: `server`, `postgres`, `caddy`, `backup` and `offsite` running; `init` and `migrate` finished. If one failed, read `vps_docker_logs` before trying again.
-6. **Check it's live:** `https://<address>/health` answers ok (fetch it yourself if you can). The secure connection can take a few minutes on a new address; wait and retry. Still failing after ten minutes: `vps_firewall_list`, and ports 80 and 443 must be open.
+6. **Firewall:** `vps_firewall_list`. No firewall on the server is fine. If one is active, it drops everything it doesn't allow: make sure it accepts TCP 80 and 443 from anywhere (and keep 22), using `vps_firewall_create-rule`, then `vps_firewall_sync`.
+7. **Check it's live:** `https://<address>/health` answers ok (fetch it yourself if you can). The secure connection can take a few minutes on a new address; wait and retry.
 
-Without the connector, guide them in hPanel: **VPS**, their server (the overview shows the address), **Docker Manager**, **Compose from URL**, paste the compose address above, project name `peak-base`, add `DOMAIN` and `MCP_SERVER_TITLE` as above, **Deploy**. If Docker Manager offers to install Docker, let it.
+**Without the connector,** guide them in hPanel. **VPS > Manage** next to their server (the overview shows the address).
+- No Docker yet: **OS & Panel > Operating System**, under **Change OS** type "Docker", pick the Docker template (Ubuntu 24.04 with Docker). This erases the server, so only on the new, empty one, with their yes. It takes about ten minutes.
+- Then **Docker Manager > Compose > Compose manually** (Compose from URL has no place for the address setting, and the server won't start without it). Fetch the compose file above, replace every `${DOMAIN...}` with their address, and give them the whole file to paste. Project name `peak-base`, then **Deploy**.
 
 Tell them when the server is up, in one line.
 
