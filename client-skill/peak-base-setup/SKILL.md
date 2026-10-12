@@ -44,7 +44,12 @@ Send them this link:
 
 https://www.hostinger.com/cart?product=vps%3Avps_kvm_4&period=12&referral_type=cart_link&REFERRALCODE=YZIBILLYZVMT&referral_id=01a0fd83-b6f5-72ed-b32e-b63823936a7c
 
-Tell them: keep the plan as it is (KVM 4). If checkout asks what to install, choose **Ubuntu with Docker**. If it asks for a server password, they choose it and keep it to themselves. Wait until they say the purchase went through.
+Tell them: keep the plan as it is (KVM 4). After paying, Hostinger walks them through setting up the server:
+- **Operating system:** choose the Ubuntu that comes with Docker (usually "Ubuntu 24.04 with Docker", under an **Applications** tab or by typing "Docker" in the search). If they already chose plain Ubuntu or skipped it, that's fine: you switch it in step 3 (with their yes, since that erases the still-empty server).
+- **Location:** what Hostinger suggests, or the closest to them.
+- **Server password:** they choose it and keep it to themselves. Nobody needs it.
+
+Wait until they say the server is set up.
 
 ## Step 2: connect to their Hostinger account
 
@@ -56,7 +61,7 @@ If it won't connect, use the hPanel clicks given under each step instead.
 ## Step 3: build the server
 
 1. `vps_virtual-machines_list` to find the server. If something else already runs on it, confirm it's the right one and empty.
-2. If it has no operating system yet: `vps_templates_list`, pick the Ubuntu template whose name mentions Docker, `vps_virtual-machines_setup` with it. Wait for it to finish.
+2. If it has no operating system yet: `vps_templates_list`, pick the Ubuntu template whose name mentions Docker, `vps_virtual-machines_setup` with it. If it runs an operating system without Docker, get their yes, then `vps_virtual-machines_recreate` with that template. Wait for it to finish.
 3. **The address:** use the one Hostinger gave the server, from `vps_virtual-machines_get` (looks like `srv123456.hstgr.cloud`). No domain setup needed. From here on `<address>` means that, without `https://`. Only if they ask for their own address (like `brain.theircompany.com`): domain on Hostinger, show them the record (type `A`, name `brain`, value the server's IP, TTL 300), get a yes, `dns_records_update` with `overwrite: true`; domain elsewhere, tell them exactly what to add where they bought it and wait.
 4. **Put Peak Base on it:** `vps_docker_create` with `project_name` `peak-base` (exactly this), `content` `https://raw.githubusercontent.com/BillyRybka/peak-base-releases/main/server/docker-compose.yml`, and `environment`:
    ```
