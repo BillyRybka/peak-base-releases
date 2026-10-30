@@ -47,4 +47,5 @@ Container names below assume the project is called `peak-base`. If Docker Manage
 
 - **Forgotten password:** in Hostinger's browser terminal, `docker exec -it peak-base-server-1 node dist/scripts/set-password.js person@clientco.com`
 - **Restore a backup:** download `restore.sh` from the same `server` folder, then `sh restore.sh` lists the backups and `sh restore.sh <name>` puts one back. `sh restore.sh --drive` works from Google Drive.
+- **Get back one deleted file:** deleted notes are in the app's Trash for 30 days. Deleted files (images, PDFs, scripts) keep a copy for 30 days too: download `restore-file.sh` from the same `server` folder, then `sh restore-file.sh` lists them and `sh restore-file.sh <id>` saves one into `restored/`.
 - **Update the server:** Docker Manager > the project > redeploy (it pulls the newest image).
