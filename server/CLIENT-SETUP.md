@@ -13,6 +13,8 @@ One sitting with the client. You need their Hostinger login, a domain or subdoma
    - `DOMAIN` = the brain's address, without `https://` (required)
    - `GDRIVE_TOKEN` = see step 3 below (add it now or later)
    - `MCP_SERVER_TITLE` = what AI apps call the connector (default "Business Brain")
+   - `PASSWORD_RECOVERY_KEY` = a random key of 32+ characters, also kept in the owner's OS password store (the setup skill makes both). It lets Claude reset a forgotten password.
+   - `RESEND_API_KEY` and `EMAIL_FROM` (optional, both or neither) = turns on the app's "Forgot password?" email. Peak Systems' key sends from `Peak Base <reset@brain.peaksystems.io>`.
 5. Deploy. In a minute or two, `https://<DOMAIN>/health` answers `ok`.
 
 ## 2. The owner account
@@ -45,7 +47,7 @@ Connector address: `https://<DOMAIN>/api/mcp`. Claude (chat, Cowork, Code), Chat
 
 Container names below assume the project is called `peak-base`. If Docker Manager named it something else, use that name in place of `peak-base`, and run the restore as `PROJECT=<name> sh restore.sh`.
 
-- **Forgotten password:** in Hostinger's browser terminal, `docker exec -it peak-base-server-1 node dist/scripts/set-password.js person@clientco.com`
+- **Forgotten password:** with email on, "Forgot password?" on the sign-in screen. Otherwise ask Claude to reset the Peak Base password (the setup skill's `reset-password` helper uses the recovery key on the owner's computer). Last resort, in Hostinger's browser terminal, `docker exec -it peak-base-server-1 node dist/scripts/set-password.js person@clientco.com`
 - **Restore a backup:** download `restore.sh` from the same `server` folder, then `sh restore.sh` lists the backups and `sh restore.sh <name>` puts one back. `sh restore.sh --drive` works from Google Drive.
 - **Get back one deleted file:** deleted notes are in the app's Trash for 30 days. Deleted files (images, PDFs, scripts) keep a copy for 30 days too: download `restore-file.sh` from the same `server` folder, then `sh restore-file.sh` lists them and `sh restore-file.sh <id>` saves one into `restored/`.
 - **Update the server:** Docker Manager > the project > redeploy (it pulls the newest image).

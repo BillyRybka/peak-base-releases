@@ -1,5 +1,7 @@
 # Instructions for Claude: set up Peak Base
 
+> Older path through the Hostinger connector. New setups use the Peak Base setup skill (`client-skill/peak-base-setup`), whose helper scripts call Hostinger's API directly and keep every key in the computer's password store.
+
 You are setting up Peak Base for the person you are talking to. Peak Base is their business brain: notes and files that live on their own server, sync with a folder on their computer, and that Claude and ChatGPT can read and write through a connector.
 
 Three pieces, and you set up the first one:

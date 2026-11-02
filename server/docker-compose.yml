@@ -11,6 +11,9 @@
 # the server. The first account created in the desktop app owns the server;
 # after that, only invited people can sign up.
 #
+# Forgotten passwords: set PASSWORD_RECOVERY_KEY (the setup skill does), and
+# optionally RESEND_API_KEY + EMAIL_FROM for emailed reset links.
+#
 # Backups: every night the database and its key go into one archive, kept 14
 # days on the server. Set GDRIVE_TOKEN (see CLIENT-SETUP.md) and each archive is
 # also copied to the "Peak Base backups" folder in that Google Drive, kept 30
@@ -31,6 +34,13 @@ x-server: &server
     MCP_LATEST_FOLDER: ${MCP_LATEST_FOLDER:-Daily}
     DOWNLOAD_BASE: ${DOWNLOAD_BASE:-}
     DOWNLOAD_PAGE: ${DOWNLOAD_PAGE:-}
+    # Forgotten passwords. PASSWORD_RECOVERY_KEY (32+ characters) matches the
+    # key setup keeps in the owner's OS password store, so Claude can reset a
+    # password without email. RESEND_API_KEY and EMAIL_FROM turn on the app's
+    # "Forgot password?" email; set both or neither (one alone stops the server).
+    PASSWORD_RECOVERY_KEY: ${PASSWORD_RECOVERY_KEY:-}
+    RESEND_API_KEY: ${RESEND_API_KEY:-}
+    EMAIL_FROM: ${EMAIL_FROM:-}
   volumes:
     - secrets:/secrets:ro
   networks: [internal]
