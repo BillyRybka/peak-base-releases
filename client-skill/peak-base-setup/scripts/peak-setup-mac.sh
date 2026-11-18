@@ -227,8 +227,21 @@ case $CMD in
     # The app is not signed by Apple yet: clear the "downloaded from the
     # internet" mark so macOS opens it without the Privacy & Security detour.
     xattr -cr "$dest/$name"
+    # Documents in iCloud would turn team notes into online-only placeholders,
+    # so a team vault the app makes goes in a home folder instead. Only when
+    # nothing chose a place yet, and before the app opens and caches its config.
+    vroot=""
+    if [ -d "$HOME/Library/Mobile Documents/com~apple~CloudDocs/Documents" ]; then
+      cfgdir="$HOME/Library/Application Support/io.peaksystems.peakbase"; cfg="$cfgdir/config.json"
+      cur='{}'; [ -s "$cfg" ] && cur=$(cat "$cfg")
+      new=$(js 'o.a.vaults_root ? "" : JSON.stringify(Object.assign(o.a, {vaults_root: o.r}), null, 2)' \
+        "{\"a\":$cur,\"r\":$(json_str "$HOME/Peak Base Vaults")}") || new=""
+      if [ -n "$new" ]; then
+        mkdir -p "$cfgdir" "$HOME/Peak Base Vaults"; printf '%s\n' "$new" >"$cfg"; vroot=" team vaults go in $HOME/Peak Base Vaults (Documents is in iCloud)"
+      fi
+    fi
     open "$dest/$name"
-    echo "installed: $dest/$name version $(defaults read "$dest/$name/Contents/Info" CFBundleShortVersionString 2>/dev/null) (opened)" ;;
+    echo "installed: $dest/$name version $(defaults read "$dest/$name/Contents/Info" CFBundleShortVersionString 2>/dev/null) (opened)$vroot" ;;
   open-connect) need "${1:-}" address; addr=$(bare "$1"); open "https://$addr/open/connect"; echo "opened https://$addr/open/connect" ;;
   open-folder) need "${1:-}" folder; dir=$(cd "$1" && pwd) || die "no folder $1"
     q="path=$(js 'encodeURIComponent(o.p)' "{\"p\":$(json_str "$dir")}")"; [ "${2:-}" = skills ] && q="$q&skills=1"

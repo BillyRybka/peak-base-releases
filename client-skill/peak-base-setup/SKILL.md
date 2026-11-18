@@ -1,6 +1,6 @@
 ---
 name: peak-base-setup
-description: Sets up Peak Base from start to finish for a business owner and moves their Obsidian notes into it. Claude does the work through Hostinger's API and the helper scripts in this skill: the server, Peak Base on it, the app on their computer, the move of their notes, and connecting Claude to their new brain. The person pays Hostinger, makes one key, and picks one password. Use when someone says "set up my business brain", "set up Peak Base", "install Peak Base", "move my Obsidian vault to Peak Base", "connect my brain to Claude", "reset my Peak Base password", or asks what to do after paying Peak Systems.
+description: Sets up Peak Base from start to finish for a business owner and moves their Obsidian notes into it. Claude does the work through Hostinger's API and the helper scripts in this skill: the server, Peak Base on it, the app on their computer, the move of their notes, and connecting Claude to their new brain. The person pays Hostinger, makes one key, and picks one password. Also gets an invited teammate onto their team's brain (app, account, their own Claude connection) and helps the owner add people and set who sees what. Use when someone says "set up my business brain", "set up Peak Base", "install Peak Base", "move my Obsidian vault to Peak Base", "connect my brain to Claude", "reset my Peak Base password", "I was invited to Peak Base", "join my team's brain", "add someone to my team", "invite my assistant", "who can see what", or asks what to do after paying Peak Systems.
 ---
 
 # Peak Base setup
@@ -9,9 +9,11 @@ Your job: set up Peak Base completely and move their Obsidian notes into it. Whe
 
 **They do three things.** Pay Hostinger. Make one key on a Hostinger page and paste it into a private box. Pick their Peak Base password. Everything else is yours.
 
+**Invited by someone else?** If they got an invite to a team's Peak Base (a link with `/invite/` in it, or someone told them to join), they need no server: skip to **Joining a team** below.
+
 ## Where this runs
 
-This needs the **Code tab of the Claude app** (or Claude Code), because it installs an app and runs commands on their computer. In a plain chat or Cowork, tell them: "Open the Claude app, click **Code** at the top, pick your home folder, and say *set up my business brain*." Then stop.
+This needs the **Code tab of the Claude app** (or Claude Code), because it installs an app and runs commands on their computer. In a plain chat or Cowork, tell them: "Open the Claude app, click **Code** at the top, pick your home folder, and say *set up my business brain*" (or, for an invited teammate, *I was invited to Peak Base*). Then stop.
 
 The helpers live in this skill's `scripts/` folder. Run them with the full path:
 - **Windows:** `powershell -NoProfile -ExecutionPolicy Bypass -File "<skill folder>/scripts/peak-setup.ps1" <command> ...`
@@ -134,18 +136,48 @@ Two lines, no more:
 
 ## Later, when they ask
 
-**Forgot their Peak Base password.** If "Forgot password?" shows on the sign-in screen, that emails them a link. Otherwise: `helper reset-password <address> <their email>`. A private box asks for the new password twice; the server sets it with the recovery key saved on this computer. On another computer the key isn't there: Peak Systems can reset it.
+**Forgot their Peak Base password.** If "Forgot password?" shows on the sign-in screen, that emails them a link. Otherwise: `helper reset-password <address> <their email>`. A private box asks for the new password twice; the server sets it with the recovery key saved on this computer. On another computer the key isn't there: Peak Systems can reset it. A teammate who forgot theirs: on the owner's computer, run the same command with the teammate's email; the owner picks a new password in the box and gives it to the teammate privately (never in this chat).
 
 **Backups to their Google Drive.** The server backs up every night and keeps 14 days. To also keep 30 days in their Drive:
 1. Install rclone: Windows `winget install Rclone.Rclone`, Mac `brew install rclone` (no Homebrew? Peak Systems can help).
 2. `rclone authorize "drive"`. A browser opens; they sign in to Google and allow access.
 3. The window prints a block starting with `{"access_token"`. They copy it themselves into hPanel: **VPS > Docker Manager > peak-base > Environment**, `GDRIVE_TOKEN` = that block, then redeploy. It never goes in this chat.
 
-**Their team.** In Peak Base: **Vault settings > Members and access > Invite people**, then **Copy link**, sent however they like. The access board on the same page sets what each person sees.
+**Their team.** See **Adding people** below.
 
 **Updates.** The app updates itself. Server: `helper update-server <id>` (find the id with `helper servers`).
 
 **Restoring a backup:** Peak Systems handles it.
+
+## Adding people (the owner)
+
+1. **Invite.** In Peak Base: **Vault settings > Members and access > Invite people**. They type the person's email, pick **Member** (most people) or **Admin** (can invite people and change who sees what), and pick how much the person sees to start: **Can edit everything**, **Can view everything** or **No access**. Then **Copy link** next to the invitation and send it however they like (text, email, Slack). The link works for 7 days. The dialog also shows a join code; the link is simpler.
+2. **Tell them what to send with it:** "Install the Peak Base setup skill in your Claude app and say *I was invited to Peak Base*, then paste this link. Or follow the guide." The guide for people without Claude: https://github.com/BillyRybka/peak-base-releases/blob/main/docs/join-your-team.md
+3. **Who sees what**, on the same page, in plain words:
+   - The **Everyone** row is the starting point for every member: Can edit, Can view or No access.
+   - Each person can get their own level, and theirs wins, for them only.
+   - For folder by folder, click the person, open **Access**, and drag folders between **Can edit**, **Can view** and **No access**. Each move applies right away.
+   - The **New members** row decides what someone who joins later sees of the notes that already exist.
+   - **No access means nobody**, the owner included, until someone gives access back. If they close off the whole vault, give themselves access first.
+   - When someone loses access, those notes leave that person's computer. They stay on the server for everyone else.
+4. **Or let Claude do it.** With the Business Brain connector, an owner or admin can just ask: "Share the Sales folder with Jane, view only" or "What can Mike see?". Use the brain's `list_resource_access`, `manage_access`, `get_access_default` and `set_access_default` tools. Say what will change and get their yes before `manage_access` or `set_access_default`, and before anything that takes access away.
+5. **Removing someone:** click the **...** next to their name, then **Remove**. Their access ends on all their computers at once.
+
+Each person connects Claude with their own sign-in, so their Claude sees exactly what they can see, and nothing more.
+
+## Joining a team (an invited teammate)
+
+They need no server and no Hostinger: the owner already has one. **They do two things:** open the invite link, and pick their Peak Base password. Tell them that first, then:
+
+1. **The link.** Ask them to paste the invite link here (it's an invitation, not a password, so the chat is fine). Their team's `<address>` is the part between `https://` and `/invite/`. No link? Ask the person who invited them to send one from **Members and access**.
+2. **The app.** Tell them: "Next I install the Peak Base app. If you're asked to approve it, click Approve." Then `helper install-app`, with the same fallback as Step 4 if the Mac blocks it. If its answer says team vaults go in `Peak Base Vaults` in their home folder, their Documents folder is in iCloud or OneDrive and the notes are kept out of it; say nothing unless they ask.
+3. **Join.** Open the link for them (Windows `Start-Process "<link>"`, Mac `open "<link>"`). Tell them: "On this page, skip step 1 (the app is installed), and click **Open Peak Base**. If Peak Base asks whether to use this server, say yes."
+4. **Their account.** Tell them: "Click **Create account** and use the exact email the invitation names; it's on the page you just saw. Make the password in your password manager first (or write it down), then paste or type it, and click the eye to check it." If they already have an account on this team's server, they sign in instead. Ask which email they used; never ask for the password.
+5. **Their notes.** They land in the team's vault and it downloads to their computer. A big vault takes a few minutes; let it finish.
+6. **Connect Claude** exactly as in Step 7, with the team's address. They sign in with their own Peak Base email and password. If Claude asks to use a Business Brain tool, **Always allow** is fine.
+7. **Close**, two lines: "You're in your team's brain, and Claude can read and write the notes you have access to from any chat. If you can't see a folder you need, ask the person who invited you."
+
+If the link says the invitation expired, was already used, or was withdrawn: they ask the owner for a new one. If it says already used and it was them, they just sign in.
 
 ## For Peak Systems
 

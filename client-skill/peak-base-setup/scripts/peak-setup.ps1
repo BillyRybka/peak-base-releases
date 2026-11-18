@@ -427,8 +427,23 @@ switch ($Command) {
     $exe = Get-ChildItem (Join-Path $env:LOCALAPPDATA "Peak Base") -Filter *.exe -ErrorAction SilentlyContinue |
       Where-Object { $_.Name -ne "uninstall.exe" } | Select-Object -First 1
     if (-not $exe) { throw "the installer finished (exit $($p.ExitCode)) but Peak Base is not in $env:LOCALAPPDATA\Peak Base" }
+    # Documents moved into OneDrive would turn team notes into online-only
+    # placeholders, so a team vault the app makes goes in a home folder instead.
+    # Only when nothing chose a place yet, and before the app opens and caches its config.
+    $vroot = ""
+    if ([Environment]::GetFolderPath("MyDocuments") -match "OneDrive" -and -not (Get-Process -Name $exe.BaseName -ErrorAction SilentlyContinue)) {
+      $cfgDir = Join-Path $env:APPDATA "io.peaksystems.peakbase"; $cfgFile = Join-Path $cfgDir "config.json"
+      $j = if ((Test-Path $cfgFile) -and (Get-Item $cfgFile).Length -gt 0) { Get-Content $cfgFile -Raw | ConvertFrom-Json } else { [pscustomobject]@{} }
+      if (-not $j.vaults_root) {
+        $root = Join-Path ([Environment]::GetFolderPath("UserProfile")) "Peak Base Vaults"
+        New-Item -ItemType Directory -Force $root, $cfgDir | Out-Null
+        $j | Add-Member -NotePropertyName vaults_root -NotePropertyValue $root -Force
+        [IO.File]::WriteAllText($cfgFile, ($j | ConvertTo-Json -Depth 20), (New-Object Text.UTF8Encoding $false))
+        $vroot = " team vaults go in $root (Documents is in OneDrive)"
+      }
+    }
     Start-Process -FilePath $exe.FullName
-    "installed and opened: $($exe.FullName) version $($exe.VersionInfo.FileVersion) (downloaded $size MB)"
+    "installed and opened: $($exe.FullName) version $($exe.VersionInfo.FileVersion) (downloaded $size MB)$vroot"
   }
   "open-connect" {
     $address = (Arg 0 "address") -replace "^https?://", "" -replace "/+$", ""
