@@ -45,4 +45,13 @@ Never point this at the NAS Business Brain (business-brain.tail8a2137.ts.net).
 - [ ] `open-folder <folder> skills`: the app asks, then opens, syncs and turns on skill sync.
 - [ ] The custom connector signs in only after the account exists, and the test question answers from their notes.
 
+## A teammate
+
+- [ ] Mac `find-vaults` marks the last opened vault `last_open: true`.
+- [ ] `install-app` on a Mac with Peak Base open quits it and opens the new copy.
+- [ ] `install-app` with Documents in iCloud (Mac) or OneDrive (Windows) says team vaults go in `Peak Base Vaults` in the home folder, and a joined vault lands there.
+- [ ] Invite a second email as Member with Can view everything. On another computer the teammate path joins through the link, the vault downloads, and the teammate's connector sees the vault but cannot edit.
+- [ ] The owner asks Claude to give the teammate edit access to one folder: Claude says what will change, waits for yes, and the teammate can then edit there.
+- [ ] `reset-password` on the owner's computer with the teammate's email works.
+
 Time the whole run. Target: under 30 minutes of their time.
