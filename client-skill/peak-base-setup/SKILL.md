@@ -39,7 +39,7 @@ Tell them, in about this many words:
 
 > Here's how this goes. You'll do three things: pay for your server on Hostinger, make one key on a Hostinger page, and pick your Peak Base password. I do the rest, and it takes about half an hour.
 >
-> Along the way your computer or I will ask you to approve a few things: running my setup steps, installing the Peak Base app, and (on a Mac) letting me use your Downloads and Documents folders. Click **Allow** or **Approve** each time. If a message says a step was blocked, open the mode menu next to the message box and pick the mode that asks before each action, then tell me to try again.
+> Along the way your computer or I will ask you to approve a few things: running my setup steps, installing the Peak Base app, and (on a Mac) letting me look in your Desktop and Documents folders for your notes. Click **Allow** or **Approve** each time. If a message says a step was blocked, open the mode menu next to the message box and pick the mode that asks before each action, then tell me to try again.
 >
 > Have you already paid for the Hostinger server?
 
@@ -54,7 +54,7 @@ https://www.hostinger.com/cart?product=vps%3Avps_kvm_4&period=12&referral_type=c
 Tell them exactly this:
 - The plan is already picked (**KVM 4**) for **12 months**. If Hostinger offers 24 months or another deal, say no and keep 12 months.
 - Leave every add-on unticked.
-- To sign in, use **Continue with Google** if they have Google, so there's no new password to remember. Otherwise they make a Hostinger account.
+- To sign in, use **Continue with Google** if they have Google, so there's no new password to remember. Otherwise they make a Hostinger account and save that password in their password manager or write it down now: they sign in again in Step 2.
 - Pay.
 - After paying, Hostinger may show a page to set up the server (operating system, location, password, malware scanner). **Skip it or close it.** You set all of that up. If they already filled it in, that's fine too.
 
@@ -92,12 +92,14 @@ Tell them in one line that their server is up.
 
 Tell them: "Next I install the Peak Base app. If you're asked to approve it, click Approve."
 
-`helper install-app`. On Windows it installs and opens the app with no clicks. On a Mac it copies the app into Applications, clears the "unknown developer" block so it opens without a trip to Privacy & Security, and opens it. The app updates itself from now on.
+`helper install-app`. On Windows it installs and opens the app with no clicks. On a Mac it copies the app into Applications, quits an open copy first, clears the "unknown developer" block so it opens without a trip to Privacy & Security, and opens it. The app updates itself from now on.
+
+If that step is blocked, or the Mac still says Peak Base "can't be opened": tell them to open **System Settings > Privacy & Security**, scroll down, click **Open Anyway** next to Peak Base, and confirm.
 
 ## Step 5: their account
 
 1. `helper open-connect <address>`. A browser page opens and hands over to Peak Base with their server filled in; they confirm it.
-2. Tell them: "Click **Create account**. Type your name, your email and a password you'll remember. Click the eye in the password box to check what you typed, then save it in your password manager or write it down. This is the only password you need for Peak Base."
+2. Tell them: "Click **Create account**. Type your name and your email. For the password, make it in your password manager first (or write it down on paper), then paste or type it here: your password manager can't save it from this screen. Click the eye in the password box to check what you typed. This is the only password you need for Peak Base."
 3. Ask which email they used (you need it if they ever forget the password). Never ask for the password.
 
 The first account owns the server; after that, only people they invite can join.

@@ -206,7 +206,8 @@ case $CMD in
     done ;;
 
   install-app)
-    dmg="$HOME/Downloads/PeakBase-Mac.dmg"
+    # A temp folder, not Downloads, so macOS asks for no folder permission.
+    dmg="$(mktemp -d)/PeakBase-Mac.dmg"
     curl -fsSL -o "$dmg" "$DOWNLOAD" || die "download failed"
     mnt=$(hdiutil attach -nobrowse -noverify -noautoopen "$dmg" | awk -F'\t' '/\/Volumes\//{print $NF}' | tail -n1)
     [ -d "$mnt" ] || die "could not open the download"
@@ -214,6 +215,11 @@ case $CMD in
     [ -n "$app" ] || { hdiutil detach "$mnt" -quiet; die "no app inside the download"; }
     dest=/Applications; [ -w "$dest" ] || { dest="$HOME/Applications"; mkdir -p "$dest"; }
     name=$(basename "$app")
+    # An open copy would come back instead of the new one: quit it first.
+    if pgrep -f "$dest/$name/Contents/MacOS/" >/dev/null 2>&1; then
+      osascript -e "quit app \"${name%.app}\"" >/dev/null 2>&1 || true
+      for _ in 1 2 3 4 5 6 7 8 9 10; do pgrep -f "$dest/$name/Contents/MacOS/" >/dev/null 2>&1 || break; sleep 1; done
+    fi
     rm -rf "$dest/$name.old"; [ -d "$dest/$name" ] && mv "$dest/$name" "$dest/$name.old"
     ditto "$app" "$dest/$name" || { hdiutil detach "$mnt" -quiet; die "copy into $dest failed"; }
     rm -rf "$dest/$name.old"
@@ -234,8 +240,9 @@ case $CMD in
     icloud_docs=false; [ -d "$HOME/Library/Mobile Documents/com~apple~CloudDocs/Documents" ] && icloud_docs=true
     js 'Object.keys(o.vaults).map(function(k){return o.vaults[k]})' "$(cat "$cfg")" >/dev/null || die "could not read $cfg"
     out="["; first=1
-    while IFS= read -r p; do
+    while read -r open p; do
       [ -n "$p" ] || continue
+      lo=false; [ "$open" = 1 ] && lo=true
       ex=false; files=0; mb=0; ph=0; sk=false
       if [ -d "$p" ]; then
         ex=true; files=$(find "$p" -type f -not -path '*/.git/*' -not -path '*/.obsidian/*' -not -path '*/.trash/*' 2>/dev/null | wc -l | tr -d ' ')
@@ -247,9 +254,9 @@ case $CMD in
       case $p in "$HOME/Documents"*|"$HOME/Desktop"*) [ $icloud_docs = true ] && cloud=true ;; esac
       [ "$ph" != 0 ] && cloud=true
       [ $first = 1 ] || out="$out,"; first=0
-      out="$out{\"path\":$(json_str "$p"),\"exists\":$ex,\"in_cloud_storage\":$cloud,\"icloud_placeholders\":$ph,\"files\":$files,\"megabytes\":${mb:-0},\"has_skills\":$sk}"
+      out="$out{\"path\":$(json_str "$p"),\"exists\":$ex,\"in_cloud_storage\":$cloud,\"icloud_placeholders\":$ph,\"files\":$files,\"megabytes\":${mb:-0},\"has_skills\":$sk,\"last_open\":$lo}"
     done <<EOF
-$(js 'Object.keys(o.vaults).map(function(k){return o.vaults[k].path}).join("\n")' "$(cat "$cfg")")
+$(js 'Object.keys(o.vaults).map(function(k){var v=o.vaults[k];return (v.open?"1 ":"0 ")+v.path}).join("\n")' "$(cat "$cfg")")
 EOF
     echo "$out]" ;;
   move-vault) # move-vault <from> [to]
