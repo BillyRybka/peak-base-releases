@@ -61,7 +61,7 @@ Tell them exactly this:
 - Pay.
 - After paying, Hostinger may show a page to set up the server (operating system, location, password, malware scanner). **Skip it or close it.** You set all of that up. If they already filled it in, that's fine too.
 
-Wait until they say they've paid, then ask: "Do you see a Hostinger page or email saying the payment went through or the order is complete?" Signing in, verifying the email or landing on Hostinger's home page is not paying. Only a payment confirmation counts. If they're not sure, open the checkout link again and have them look: an empty cart or a page asking to pay means it isn't paid.
+Wait until they say they've paid. Signing in, verifying the email or landing on Hostinger's home page is not paying. You check the payment yourself in Step 2, from Hostinger's own records, so don't take their word or yours for it.
 
 ## Step 2: the Hostinger key
 
@@ -70,10 +70,11 @@ Wait until they say they've paid, then ask: "Do you see a Hostinger page or emai
    `helper ask-secret hostinger-token "Peak Base: Hostinger key" "Paste the key you just copied (Ctrl+V on Windows, Cmd+V on Mac), then click Save. It stays on this computer." 20`
    It answers `saved` or `cancelled`. On Windows the box takes a few seconds to appear.
 3. `helper check-token`. A refusal (401) means the copy missed part of the key: ask them to copy it again and reopen the box.
+4. `helper paid`. This asks Hostinger whether the account has a VPS server or an active VPS subscription. `"paid": true`: go on. `"paid": false`: it isn't paid, whatever anyone thought. Tell them: "Hostinger doesn't show a payment yet. I'm opening the checkout again; pay there, and tell me when the page says it went through." Open the checkout link from Step 1 again, then run `helper paid` again. Hostinger can take a few minutes to show a fresh purchase: if they saw a payment confirmation, check again every minute for ten minutes before reopening the checkout. Never go to Step 3 until it says `"paid": true`.
 
 ## Step 3: build the server
 
-1. `helper servers`. Their new server is the KVM 4 one, usually the newest. Nothing there? First ask whether they saw the payment confirmation. If not, they haven't paid: open the checkout link from Step 1 again and have them pay (the key they made still works). If they did see it, the purchase is still going through: check again every minute for ten minutes.
+1. `helper servers`. Their new server is the KVM 4 one, usually the newest. Nothing there yet although `paid` said true: the purchase is still being set up; check again every minute for ten minutes.
 2. `helper options`. Pick the data center closest to them (the time zone helps; ask their city if it's unclear). Always pass it explicitly.
 3. Set it up, depending on its `state`:
    - `initial`: `helper setup-server <id> <data center id>`. This installs Ubuntu with Docker and gives it a long random root password that only lives in their computer's password store. Nobody needs it, so they never see it.

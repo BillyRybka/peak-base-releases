@@ -136,6 +136,10 @@ case $CMD in
     echo "ok: the token works and sees $(js '(o.data||o).length' "$a") server(s)" ;;
   servers) a=$(hapi GET /api/vps/v1/virtual-machines) || exit 1
     js '(o.data||o).map(function(v){return {id:v.id,state:v.state,actions_lock:v.actions_lock,plan:v.plan,hostname:v.hostname,ipv4:(v.ipv4||[]).map(function(i){return i.address}),template:v.template?v.template.name:null,data_center_id:v.data_center_id,firewall_group_id:v.firewall_group_id,created_at:v.created_at}})' "$a" ;;
+  paid) # proof of payment from Hostinger: a VPS server, or an active VPS subscription
+    v=$(hapi GET /api/vps/v1/virtual-machines) || exit 1; s=$(hapi GET /api/billing/v1/subscriptions 2>/dev/null) || s='[]'
+    js '(function(){var v=o.v.data||o.v,s=(o.s.data||o.s).filter(function(x){return /KVM|VPS/.test(String(x.name))});return {paid:v.length>0||s.some(function(x){return x.status==="active"}),servers:v.length,vps_subscriptions:s.map(function(x){return {name:x.name,status:x.status,created_at:x.created_at,expires_at:x.expires_at}})}})()' \
+      "{\"v\":$v,\"s\":$s}" ;;
   options) d=$(hapi GET /api/vps/v1/data-centers) || exit 1; t=$(hapi GET /api/vps/v1/templates) || exit 1
     js '{docker_template:(o.t.data||o.t).filter(function(x){return /Ubuntu/.test(x.name)&&/Docker/.test(x.name)}).sort(function(a,b){return a.name<b.name?1:-1}).map(function(x){return {id:x.id,name:x.name}})[0], this_computer_time_zone:o.tz, data_centers:(o.d.data||o.d).map(function(x){return {id:x.id,name:x.name,city:x.city,location:x.location,continent:x.continent}})}' \
       "{\"d\":$d,\"t\":$t,\"tz\":$(json_str "$(readlink /etc/localtime | sed 's#.*zoneinfo/##')")}" ;;
@@ -306,7 +310,7 @@ EOF
 Peak Base setup helper. Commands:
   ask-secret <name> <title> <message> [minLength] [confirm]   private dialog, saved in the Keychain
   has-secret <name> | make-secret <name> [length] | forget-secret <name>
-  check-token | servers | options
+  check-token | paid | servers | options
   setup-server <id> <dataCenterId> [templateId] | set-root-password <id>
   recreate-server <id> erase-everything [templateId] | wait-server <id> [minutes]
   deploy <id> <address> | update-server <id> | projects <id> | containers <id> | logs <id> | firewall <id> | health <address> [minutes]

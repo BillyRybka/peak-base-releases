@@ -303,6 +303,19 @@ switch ($Command) {
       }
     })
   }
+  "paid" {
+    # Proof of payment from Hostinger itself, not from what the person remembers:
+    # a VPS server on the account, or an active VPS subscription.
+    $vms = @(Get-Items (Invoke-Hostinger GET "/api/vps/v1/virtual-machines" $null))
+    $subs = @(); try { $subs = @(Get-Items (Invoke-Hostinger GET "/api/billing/v1/subscriptions" $null)) } catch { }
+    $vpsSubs = @($subs | Where-Object { "$($_.name)" -match "KVM|VPS" })
+    $active = @($vpsSubs | Where-Object { "$($_.status)" -match "^active$" })
+    Out-Json ([ordered]@{
+      paid = (($vms.Count -gt 0) -or ($active.Count -gt 0))
+      servers = $vms.Count
+      vps_subscriptions = @($vpsSubs | ForEach-Object { [ordered]@{ name = $_.name; status = $_.status; created_at = $_.created_at; expires_at = $_.expires_at } })
+    })
+  }
   "options" {
     $dcs = Get-Items (Invoke-Hostinger GET "/api/vps/v1/data-centers" $null)
     $t = Find-DockerTemplate
@@ -534,7 +547,7 @@ switch ($Command) {
 Peak Base setup helper. Commands:
   ask-secret <name> <title> <message> [minLength] [confirm]   private box, saved in Credential Manager
   has-secret <name> | make-secret <name> [length] | forget-secret <name>
-  check-token | servers | options
+  check-token | paid | servers | options
   setup-server <id> <dataCenterId> [templateId] | set-root-password <id>
   recreate-server <id> erase-everything [templateId] | wait-server <id> [minutes]
   deploy <id> <address> | update-server <id> | projects <id> | containers <id> | logs <id> | firewall <id> | health <address> [minutes]
