@@ -80,7 +80,7 @@ Wait until they say they've paid. Signing in, verifying the email or landing on 
    - `initial`: `helper setup-server <id> <data center id>`. This installs Ubuntu with Docker and gives it a long random root password that only lives in their computer's password store. Nobody needs it, so they never see it.
    - `running` with an Ubuntu Docker template (they did Hostinger's setup page): `helper set-root-password <id>`, so they don't have to remember the password they picked there.
    - `running` without Docker: the server needs a fresh start. Only on a new, empty server and with their yes: `helper recreate-server <id> erase-everything`.
-4. **Use the wait.** Building the server takes 5 to 15 minutes, so don't sit idle. Start `helper wait-server <id> 20` as a background command (or check `helper servers` every couple of minutes), and while it runs, do the parts that don't need the server:
+4. **Use the wait.** Building the server takes 5 to 15 minutes, so don't sit idle. Check on the server yourself; never wait for them to tell you it's done. Run `helper wait-server <id> 5`, giving the command a 6 minute timeout (the default is often 2 minutes): it checks every 20 seconds and returns the moment the server is ready, or after 5 minutes. Keep every wait at 5 minutes or less, because a longer command gets cut off by your own time limit and then nothing is checking. If it says not ready, tell them in a few words ("Still building, about 5 minutes in") and run it again. Between those checks, do the parts that don't need the server:
    - **Step 4** (install the app).
    - **Step 6, parts 1 and 2** (find their vault, and copy it out of cloud storage if needed). A big copy takes a while, so start it now.
 
@@ -91,8 +91,8 @@ Wait until they say they've paid. Signing in, verifying the email or landing on 
 5. **The address** is the server's `hostname` (looks like `srv123456.hstgr.cloud`). From here on `<address>` means that, with no `https://`. Only if they ask for their own address (like `brain.theircompany.com`): they add an `A` record for it pointing at the server's IP where they bought the domain, and you wait until it resolves.
 6. `helper firewall <id>` makes sure the web ports are open.
 7. `helper deploy <id> <address>`. It installs Peak Base and gives the server a password recovery key that matches one saved on their computer (so you can reset their password later), and turns on emailed password resets when this skill carries Peak Systems' mail key. Say nothing about either unless they ask.
-8. `helper containers <id>` until `server`, `postgres`, `caddy`, `backup` and `offsite` run and `init` and `migrate` have exited. If one failed, read `helper logs <id>` before trying again.
-9. `helper health <address> 15`. The secure connection can take a few minutes on a new address.
+8. `helper containers <id>` (once a minute) until `server`, `postgres`, `caddy`, `backup` and `offsite` run and `init` and `migrate` have exited. If one failed, read `helper logs <id>` before trying again.
+9. `helper health <address> 5`, run again until it answers (the same 5 minute rule as above). The secure connection can take a few minutes on a new address.
 
 Tell them in one line that their server is up.
 

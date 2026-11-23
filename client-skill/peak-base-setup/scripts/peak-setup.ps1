@@ -259,7 +259,7 @@ function Wait-Server([string] $id, [int] $minutes) {
     [Console]::Error.WriteLine("Server is $($vm.state) ($($vm.actions_lock)). Checking again in 20 seconds.")
     Start-Sleep -Seconds 20
   }
-  throw "the server was still not ready after $minutes minutes"
+  throw "the server was still not ready after $minutes minutes; run wait-server again"
 }
 
 # ---- Commands ----------------------------------------------------------------

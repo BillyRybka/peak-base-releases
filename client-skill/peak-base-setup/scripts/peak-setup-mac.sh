@@ -165,8 +165,8 @@ case $CMD in
     while :; do
       a=$(hapi GET "/api/vps/v1/virtual-machines/$1") || exit 1
       s=$(js 'o.state+" "+o.actions_lock' "$a")
-      [ "$s" = "running unlocked" ] && { echo "ready: $(js 'o.hostname+" "+JSON.stringify((o.ipv4||[]).map(function(i){return i.address}))' "$a")"; break; }
-      [ "$(date +%s)" -lt $end ] || die "the server was still not ready ($s)"
+      case "$s" in "running locked") ;; running*) { echo "ready: $(js 'o.hostname+" "+JSON.stringify((o.ipv4||[]).map(function(i){return i.address}))' "$a")"; break; } ;; esac
+      [ "$(date +%s)" -lt $end ] || die "the server was still not ready ($s); run wait-server again"
       echo "Server is $s. Checking again in 20 seconds." >&2; sleep 20
     done ;;
   deploy) # deploy <serverId> <address>
