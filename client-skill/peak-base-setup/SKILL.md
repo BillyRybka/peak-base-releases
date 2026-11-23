@@ -137,6 +137,13 @@ Only after sync has started (until then the sign-in page doesn't know their acco
 
    "Click Add, then Connect. A page opens: sign in with your Peak Base email and password, then click Allow." The connector then works in every Claude chat, Cowork and the phone app.
 3. Test it. If its tools have reached this session, call `start_session`, then search their notes for something you saw in their folder names. Otherwise ask them to open a new chat and ask "What do my notes say about <a real topic from their folders>?". It should answer from their notes.
+4. **Make Claude use it and keep it current.** Without this, Claude only reaches for the brain when a question obviously needs it, and never saves what they tell it. Tell them: "Last thing. In the Claude app's settings, find the box for your personal preferences (what Claude should consider in every response) and paste this in:" then give this alone in a code block:
+
+   ```
+   My business lives in my Business Brain connector. Before answering anything about my business, my clients, my projects or my work, check the Business Brain first and use what's there. When I tell you something new that belongs there (a decision, a client update, a change in how we do things), save it to the right note in the Business Brain and tell me in one line what you saved. Never delete anything there without asking me first.
+   ```
+
+   If they can't find the box, ask what they see; never guess at the screen. It then applies to every chat, Cowork and the phone app.
 
 ## Step 8: close
 
@@ -184,7 +191,7 @@ They need no server and no Hostinger: the owner already has one. **They do two t
 3. **Join.** Open the link for them (Windows `Start-Process "<link>"`, Mac `open "<link>"`). Tell them: "On this page, skip step 1 (the app is installed), and click **Open Peak Base**. If Peak Base asks whether to use this server, say yes."
 4. **Their account.** Tell them: "Click **Create account** and use the exact email the invitation names; it's on the page you just saw. Make the password in your password manager first (or write it down), then paste or type it, and click the eye to check it." If they already have an account on this team's server, they sign in instead. Ask which email they used; never ask for the password.
 5. **Their notes.** They land in the team's vault and it downloads to their computer. A big vault takes a few minutes; let it finish.
-6. **Connect Claude** exactly as in Step 7, with the team's address. They sign in with their own Peak Base email and password. If Claude asks to use a Business Brain tool, **Always allow** is fine.
+6. **Connect Claude** exactly as in Step 7, with the team's address. They sign in with their own Peak Base email and password. If Claude asks to use a Business Brain tool, **Always allow** is fine. Then Step 7 part 4: the personal preferences text, so their Claude checks the brain first and saves what they tell it.
 7. **Close**, two lines: "You're in your team's brain, and Claude can read and write the notes you have access to from any chat. If you can't see a folder you need, ask the person who invited you."
 
 If the link says the invitation expired, was already used, or was withdrawn: they ask the owner for a new one. If it says already used and it was them, they just sign in.

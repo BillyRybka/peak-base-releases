@@ -38,6 +38,16 @@ This lets Claude read and write your team's notes from any chat, on your compute
 4. Click **Add**, then **Connect**. Sign in with your Peak Base email and password, then click **Allow**.
 5. Open a new chat and ask Claude something your team's notes would know. The first time it uses a Business Brain tool, Claude may ask; **Always allow** is fine.
 
+## 5. Make Claude use it and keep it current
+
+In the Claude app's settings, find the box for your personal preferences (what Claude should consider in every response) and paste this in:
+
+```
+My business lives in my Business Brain connector. Before answering anything about my business, my clients, my projects or my work, check the Business Brain first and use what's there. When I tell you something new that belongs there (a decision, a client update, a change in how we do things), save it to the right note in the Business Brain and tell me in one line what you saved. Never delete anything there without asking me first.
+```
+
+Now Claude checks your team's notes before answering about your work, and saves new decisions and updates where they belong.
+
 ## If something goes wrong
 
 - **The invite page says the invitation expired, was used, or was withdrawn:** ask the person who invited you for a new link. If you already used it, just sign in.
