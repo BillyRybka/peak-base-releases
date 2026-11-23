@@ -80,7 +80,11 @@ Wait until they say they've paid. Signing in, verifying the email or landing on 
    - `initial`: `helper setup-server <id> <data center id>`. This installs Ubuntu with Docker and gives it a long random root password that only lives in their computer's password store. Nobody needs it, so they never see it.
    - `running` with an Ubuntu Docker template (they did Hostinger's setup page): `helper set-root-password <id>`, so they don't have to remember the password they picked there.
    - `running` without Docker: the server needs a fresh start. Only on a new, empty server and with their yes: `helper recreate-server <id> erase-everything`.
-4. `helper wait-server <id> 20`. Setup takes 5 to 15 minutes; tell them it's a good moment for a coffee.
+4. **Use the wait.** Building the server takes 5 to 15 minutes, so don't sit idle. Start `helper wait-server <id> 20` as a background command (or check `helper servers` every couple of minutes), and while it runs, do the parts that don't need the server:
+   - **Step 4** (install the app).
+   - **Step 6, parts 1 and 2** (find their vault, and copy it out of cloud storage if needed). A big copy takes a while, so start it now.
+
+   Tell them: "Your server is building, which takes about 10 minutes. Meanwhile I'll install the app and get your notes ready." When the server is ready, come back here and carry on with part 5. If a step in the meantime needs them (an approval, closing Obsidian), ask then.
 
 **When Hostinger is down or busy** (maintenance, 5xx answers, "try again"), the helper waits and retries on its own for several minutes. If it still fails: tell them Hostinger is doing maintenance, wait five minutes, and run the same command again. Do this up to three times before sending them to Peak Systems. Never say the server can't be made.
 
@@ -93,6 +97,8 @@ Wait until they say they've paid. Signing in, verifying the email or landing on 
 Tell them in one line that their server is up.
 
 ## Step 4: the app
+
+Done during the server build (Step 3, part 4). Only do it here if that was skipped.
 
 Tell them: "Next I install the Peak Base app. If you're asked to approve it, click Approve."
 
@@ -109,6 +115,8 @@ If that step is blocked, or the Mac still says Peak Base "can't be opened": tell
 The first account owns the server; after that, only people they invite can join.
 
 ## Step 6: move their notes in
+
+Parts 1 and 2 are done during the server build (Step 3, part 4); pick up at part 3, which needs their account.
 
 1. Ask them to close Obsidian if it's open. Then `helper find-vaults`. Use the one marked `last_open`, or ask which if there are several. If they don't use Obsidian, skip to step 3 with a new empty folder (`Business Brain` in their home folder).
 2. If `in_cloud_storage` is true (OneDrive, iCloud, Dropbox, Google Drive), move it first: those services swap files for online-only placeholders, which Peak Base would read as emptied notes. `helper move-vault "<vault>"` copies it to `Business Brain` in their home folder and compares file counts; go on only when it says `"same": true`. The old copy stays where it was. Tell them: "I copied your notes to a new folder outside OneDrive (or iCloud). Your old folder is untouched."
