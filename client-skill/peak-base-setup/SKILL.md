@@ -57,10 +57,11 @@ Tell them exactly this:
 - The plan is already picked (**KVM 4**) for **12 months**. If Hostinger offers 24 months or another deal, say no and keep 12 months.
 - Leave every add-on unticked.
 - To sign in, use **Continue with Google** if they have Google, so there's no new password to remember. Otherwise they make a Hostinger account and save that password in their password manager or write it down now: they sign in again in Step 2.
+- **New Hostinger account:** Hostinger asks them to verify their email, and after they do it drops them on Hostinger's home page with the cart gone. Nothing is bought yet. When they say they verified, open the checkout link above again and have them pay there (the link carries the referral; the home page does not).
 - Pay.
 - After paying, Hostinger may show a page to set up the server (operating system, location, password, malware scanner). **Skip it or close it.** You set all of that up. If they already filled it in, that's fine too.
 
-Wait until they say they've paid.
+Wait until they say they've paid, then ask: "Do you see a Hostinger page or email saying the payment went through or the order is complete?" Signing in, verifying the email or landing on Hostinger's home page is not paying. Only a payment confirmation counts. If they're not sure, open the checkout link again and have them look: an empty cart or a page asking to pay means it isn't paid.
 
 ## Step 2: the Hostinger key
 
@@ -72,7 +73,7 @@ Wait until they say they've paid.
 
 ## Step 3: build the server
 
-1. `helper servers`. Their new server is the KVM 4 one, usually the newest. Nothing yet? The purchase is still going through: check again every minute for ten minutes.
+1. `helper servers`. Their new server is the KVM 4 one, usually the newest. Nothing there? First ask whether they saw the payment confirmation. If not, they haven't paid: open the checkout link from Step 1 again and have them pay (the key they made still works). If they did see it, the purchase is still going through: check again every minute for ten minutes.
 2. `helper options`. Pick the data center closest to them (the time zone helps; ask their city if it's unclear). Always pass it explicitly.
 3. Set it up, depending on its `state`:
    - `initial`: `helper setup-server <id> <data center id>`. This installs Ubuntu with Docker and gives it a long random root password that only lives in their computer's password store. Nobody needs it, so they never see it.
